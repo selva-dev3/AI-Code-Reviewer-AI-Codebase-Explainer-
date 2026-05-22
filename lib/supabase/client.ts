@@ -1,9 +1,5 @@
-import { createBrowserClient } from '@supabase/ssr';
-import { env } from '../env';
+import { createClient } from '@/utils/supabase/client';
 
 export function createSupabaseBrowserClient() {
-  return createBrowserClient(
-    env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-url.supabase.co',
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
-  );
+  return createClient();
 }
