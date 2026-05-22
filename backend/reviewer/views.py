@@ -7,9 +7,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from .models import Review
-import anthropic
+import openai
 
-CLAUDE_MODEL = 'claude-3-5-sonnet-20241022'
+KIMI_MODEL = os.environ.get('KIMI_MODEL', 'moonshot-v1-32k')
 REVIEW_SYSTEM_PROMPT = """You are a senior software engineer conducting a thorough code review.
 Analyse the provided code and respond with a JSON array of review items.
 Each item must have:
@@ -142,35 +142,43 @@ def execute_review(request):
     if is_demo:
         return get_demo_stream(code, language, review_id)
 
-    # 3. Call Claude and Stream back
-    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    # 3. Call Kimi and Stream back
+    api_key = os.environ.get('KIMI_API_KEY') or os.environ.get('MOONSHOT_API_KEY')
     if not api_key:
         return JsonResponse(
-            {'error': 'Anthropic API key is not configured.'},
+            {'error': 'Kimi API key is not configured.'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = openai.OpenAI(
+        api_key=api_key,
+        base_url="https://api.moonshot.ai/v1"
+    )
 
     def sse_generator():
         collected_chunks = []
         try:
-            with client.messages.stream(
-                model=CLAUDE_MODEL,
-                max_tokens=4096,
-                system=REVIEW_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": f"Language: {language}\nCode:\n{code}"}],
-            ) as stream:
-                for text in stream.text_stream:
-                    collected_chunks.append(text)
-                    payload = {
-                        'type': 'content_block_delta',
-                        'delta': {
-                            'type': 'text_delta',
-                            'text': text
+            response = client.chat.completions.create(
+                model=KIMI_MODEL,
+                messages=[
+                    {"role": "system", "content": REVIEW_SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Language: {language}\nCode:\n{code}"}
+                ],
+                stream=True,
+            )
+            for chunk in response:
+                if chunk.choices and len(chunk.choices) > 0:
+                    text = chunk.choices[0].delta.content or ""
+                    if text:
+                        collected_chunks.append(text)
+                        payload = {
+                            'type': 'content_block_delta',
+                            'delta': {
+                                'type': 'text_delta',
+                                'text': text
+                            }
                         }
-                    }
-                    yield f"event: message\ndata: {json.dumps(payload)}\n\n"
+                        yield f"event: message\ndata: {json.dumps(payload)}\n\n"
                     
             yield f"event: message\ndata: {json.dumps({'type': 'message_stop'})}\n\n"
             

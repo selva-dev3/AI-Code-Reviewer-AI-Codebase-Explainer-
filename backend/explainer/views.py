@@ -9,9 +9,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from .models import Project, CodeChunk, ChatMessage
 import openai
-import anthropic
 
-CLAUDE_MODEL = 'claude-3-5-sonnet-20241022'
+KIMI_MODEL = os.environ.get('KIMI_MODEL', 'moonshot-v1-32k')
 
 def get_openai_client():
     api_key = os.environ.get('OPENAI_API_KEY')
@@ -196,35 +195,43 @@ Be concise, clear, and trace your explanations back to the actual code.
 {context_content}
 </context>"""
 
-    # 4. Stream response from Claude
-    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    # 4. Stream response from Kimi
+    api_key = os.environ.get('KIMI_API_KEY') or os.environ.get('MOONSHOT_API_KEY')
     if not api_key:
         return JsonResponse(
-            {'error': 'Anthropic API key is not configured.'},
+            {'error': 'Kimi API key is not configured.'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = openai.OpenAI(
+        api_key=api_key,
+        base_url="https://api.moonshot.ai/v1"
+    )
 
     def sse_generator():
         collected = []
         try:
-            with client.messages.stream(
-                model=CLAUDE_MODEL,
-                max_tokens=2048,
-                system=system_prompt,
-                messages=[{"role": "user", "content": question}],
-            ) as stream:
-                for text in stream.text_stream:
-                    collected.append(text)
-                    payload = {
-                        'type': 'content_block_delta',
-                        'delta': {
-                            'type': 'text_delta',
-                            'text': text
+            response = client.chat.completions.create(
+                model=KIMI_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": question}
+                ],
+                stream=True,
+            )
+            for chunk in response:
+                if chunk.choices and len(chunk.choices) > 0:
+                    text = chunk.choices[0].delta.content or ""
+                    if text:
+                        collected.append(text)
+                        payload = {
+                            'type': 'content_block_delta',
+                            'delta': {
+                                'type': 'text_delta',
+                                'text': text
+                            }
                         }
-                    }
-                    yield f"event: message\ndata: {json.dumps(payload)}\n\n"
+                        yield f"event: message\ndata: {json.dumps(payload)}\n\n"
                     
             yield f"event: message\ndata: {json.dumps({'type': 'message_stop'})}\n\n"
             
