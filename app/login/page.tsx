@@ -138,8 +138,12 @@ export default function LoginPage() {
         setActiveTab('signin');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during authentication.');
-      showToast(err.message || 'Authentication failed.', 'error');
+      let msg = err.message || 'An error occurred during authentication.';
+      if (msg.toLowerCase().includes('rate limit') || msg.toLowerCase().includes('limit exceeded')) {
+        msg = 'Supabase Email Rate Limit Exceeded. Please turn off "Confirm Email" in your Supabase Auth Dashboard -> Providers -> Email settings to allow instant logins.';
+      }
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }
