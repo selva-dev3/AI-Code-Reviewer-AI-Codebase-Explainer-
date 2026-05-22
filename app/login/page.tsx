@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Terminal, KeyRound, Mail, Sparkles, UserPlus, LogIn, AlertCircle } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/utils/supabase/client';
 import Tilt3d from '@/components/ui/Tilt3d';
 import confetti from 'canvas-confetti';
 
@@ -33,13 +33,11 @@ export default function LoginPage() {
   const [particles, setParticles] = useState<FloatingToken[]>([]);
 
   // Supabase Client for client-side authentication
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-url.supabase.co';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
-  const supabase = createBrowserClient(supabaseUrl, supabaseKey);
+  const supabase = createClient();
 
   useEffect(() => {
     // Check if we are running in Demo Mode
-    setIsDemo(process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || true);
+    setIsDemo(process.env.NEXT_PUBLIC_DEMO_MODE === 'true');
 
     // Build random floating code tokens to avoid hydration mismatches
     const generatedParticles: FloatingToken[] = Array.from({ length: 15 }).map((_, idx) => ({
