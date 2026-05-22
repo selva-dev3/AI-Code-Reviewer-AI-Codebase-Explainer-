@@ -31,12 +31,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const [particles, setParticles] = useState<FloatingToken[]>([]);
+  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  // Supabase Client for client-side authentication
   const supabase = createClient();
 
+  const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
   useEffect(() => {
-    // Check if we are running in Demo Mode
     setIsDemo(process.env.NEXT_PUBLIC_DEMO_MODE === 'true');
 
     // Build random floating code tokens to avoid hydration mismatches
@@ -58,7 +62,8 @@ export default function LoginPage() {
     // Set cookie on browser
     document.cookie = "demo-auth-active=true; path=/; max-age=86400; SameSite=Lax";
     
-    // Play confetti
+    showToast('Demo access active! Redirecting...', 'info');
+    
     confetti({
       particleCount: 100,
       spread: 70,
@@ -89,6 +94,7 @@ export default function LoginPage() {
     // In demo mode, any valid submission acts as a successful login simulation
     if (isDemo) {
       document.cookie = "demo-auth-active=true; path=/; max-age=86400; SameSite=Lax";
+      showToast('Demo account signed in! Redirecting...', 'success');
       confetti({
         particleCount: 80,
         spread: 50,
@@ -109,12 +115,15 @@ export default function LoginPage() {
         });
         if (signInError) throw signInError;
         
+        showToast('Successfully logged in! Redirecting...', 'success');
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 }
         });
-        window.location.href = '/';
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
       } else {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
@@ -125,12 +134,12 @@ export default function LoginPage() {
         });
         if (signUpError) throw signUpError;
         
-        // Supabase sign up might require email verification, explain to user
-        alert('Verification email has been sent! Please check your inbox.');
+        showToast('Account created! Verification email sent.', 'success');
         setActiveTab('signin');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during authentication.');
+      showToast(err.message || 'Authentication failed.', 'error');
     } finally {
       setLoading(false);
     }
@@ -139,6 +148,26 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 p-6">
       
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-2xl transition-all duration-300 ${
+          toast.type === 'success' 
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+            : toast.type === 'error'
+            ? 'bg-rose-500/10 border-rose-500/20 text-rose-455'
+            : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+        }`}>
+          {toast.type === 'success' ? (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+          ) : toast.type === 'error' ? (
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]" />
+          ) : (
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8]" />
+          )}
+          <span className="text-xs font-semibold">{toast.text}</span>
+        </div>
+      )}
+
       {/* Floating Code Particles Layer */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         {particles.map(p => (
@@ -211,7 +240,7 @@ export default function LoginPage() {
 
             {/* Error alerts */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-455 text-xs text-rose-450 mb-4 text-rose-400">
+              <div className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-450 text-xs mb-4 text-rose-400">
                 <AlertCircle size={14} className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -264,7 +293,7 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-855 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors border-slate-850"
+                      className="w-full bg-slate-950/80 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
                       required
                     />
                   </div>
@@ -273,7 +302,7 @@ export default function LoginPage() {
 
               <button 
                 type="submit" 
-                className="w-full flex items-center justify-center gap-1.5 py-3 bg-indigo-600 hover:bg-indigo-550 text-white text-xs font-bold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-1.5 py-3 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] disabled:opacity-40 bg-indigo-600"
                 disabled={loading}
               >
                 {activeTab === 'signin' ? <LogIn size={14} /> : <UserPlus size={14} />}
@@ -285,7 +314,7 @@ export default function LoginPage() {
             {isDemo && activeTab === 'signin' && (
               <div className="mt-6 pt-6 border-t border-slate-850/60">
                 <div className="text-center mb-4">
-                  <span className="text-[9px] font-bold text-slate-650 uppercase tracking-wider text-slate-500">Fast Local Testing</span>
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Fast Local Testing</span>
                 </div>
                 <button
                   type="button"
