@@ -178,7 +178,11 @@ export default function ExplainPage() {
       parts.push(
         <button
           key={matchIndex}
-          className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-indigo-400 hover:text-white hover:bg-indigo-650 font-mono transition-colors focus:outline-none hover:bg-indigo-600"
+          className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded text-[10px] text-cyan-400 hover:text-white font-mono transition-colors focus:outline-none"
+          style={{
+            background: 'rgba(10, 15, 30, 0.8)',
+            border: '1px solid rgba(6, 182, 212, 0.12)',
+          }}
           onClick={() => handleOpenSnippet(filePath, lineNum)}
         >
           <FileCode size={10} />
@@ -222,29 +226,45 @@ export default function ExplainPage() {
       {isSnippetDrawerOpen && selectedSnippet && (
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40" onClick={() => setIsSnippetDrawerOpen(false)} />
-          <div className="fixed top-0 right-0 w-full max-w-md h-full bg-slate-900/95 border-l border-slate-800 z-50 flex flex-col shadow-2xl animate-slide-in">
-            <div className="p-4 border-b border-slate-800/80 flex justify-between items-center bg-slate-950/30">
+          <div className="fixed top-0 right-0 w-full max-w-md h-full z-50 flex flex-col shadow-2xl animate-slide-in"
+            style={{
+              background: 'rgba(10, 15, 30, 0.95)',
+              borderLeft: '1px solid rgba(6, 182, 212, 0.1)',
+            }}
+          >
+            <div className="p-4 flex justify-between items-center"
+              style={{
+                borderBottom: '1px solid rgba(6, 182, 212, 0.08)',
+                background: 'rgba(3, 7, 18, 0.3)',
+              }}
+            >
               <div>
                 <h4 className="text-sm font-bold text-slate-100">Snippet Code View</h4>
                 <span className="text-[10px] text-slate-500 font-mono">{selectedSnippet.filePath}</span>
               </div>
               <button 
-                className="px-3 py-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-850 rounded-lg text-xs font-semibold text-slate-300 transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 transition-colors hover:text-cyan-400"
+                style={{
+                  background: 'rgba(3, 7, 18, 0.8)',
+                  border: '1px solid rgba(6, 182, 212, 0.08)',
+                }}
                 onClick={() => setIsSnippetDrawerOpen(false)}
               >
                 Close
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-4 bg-slate-950 font-mono text-[11px] leading-relaxed text-slate-350">
+            <div className="flex-1 overflow-auto p-4 font-mono text-[11px] leading-relaxed text-slate-350"
+              style={{ background: 'rgba(3, 7, 18, 1)' }}
+            >
               {selectedSnippet.content.split('\n').map((line, idx) => {
                 const currentLine = idx + 1;
                 const isHighlight = currentLine >= selectedSnippet.startLine && currentLine < selectedSnippet.startLine + 5;
                 return (
                   <div 
                     key={idx}
-                    className={`flex items-start ${isHighlight ? 'bg-indigo-500/10 border-l-2 border-indigo-500 pl-2' : 'pl-2.5'}`}
+                    className={`flex items-start ${isHighlight ? 'bg-cyan-500/10 border-l-2 border-cyan-500 pl-2' : 'pl-2.5'}`}
                   >
-                    <span className="w-8 text-right pr-3 select-none text-[10px] text-slate-650 text-slate-600">{currentLine}</span>
+                    <span className="w-8 text-right pr-3 select-none text-[10px] text-slate-600">{currentLine}</span>
                     <span className="whitespace-pre text-slate-300">{line || ' '}</span>
                   </div>
                 );
@@ -259,7 +279,7 @@ export default function ExplainPage() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold text-slate-200">Repository Contexts</h3>
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition-all bg-indigo-600" onClick={handleCreateProject}>
+            <button className="flex items-center gap-1.5 px-4 py-2 text-white text-xs font-bold rounded-lg transition-all shimmer-btn shadow-[0_4px_12px_rgba(6,182,212,0.2)]" onClick={handleCreateProject}>
               <Plus size={14} />
               <span>New Repository</span>
             </button>
@@ -269,33 +289,43 @@ export default function ExplainPage() {
             {projects.map(proj => (
               <div 
                 key={proj.id} 
-                className="rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md p-6 hover:border-indigo-500/30 transition-all cursor-pointer group"
+                className="rounded-xl backdrop-blur-md p-6 transition-all cursor-pointer group neon-border"
+                style={{
+                  background: 'rgba(10, 15, 30, 0.5)',
+                }}
                 onClick={() => setActiveProjectId(proj.id)}
               >
                 <div className="flex gap-3 items-center mb-6">
-                  <div className="p-2 bg-slate-850/80 rounded-lg text-indigo-400 group-hover:bg-indigo-500/10 transition-all">
+                  <div className="p-2 rounded-lg text-cyan-400 group-hover:shadow-[0_0_12px_rgba(6,182,212,0.3)] transition-all"
+                    style={{ background: 'rgba(6, 182, 212, 0.08)' }}
+                  >
                     <Folder size={18} />
                   </div>
-                  <h4 className="text-sm font-bold text-slate-250 group-hover:text-indigo-400 transition-colors text-slate-200">{proj.name}</h4>
+                  <h4 className="text-sm font-bold text-slate-200 group-hover:text-cyan-400 transition-colors">{proj.name}</h4>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
                   <span>{proj.files.length} indexed files</span>
-                  <span className="text-indigo-400 flex items-center gap-0.5">RAG <ArrowUpRight size={10} /></span>
+                  <span className="text-cyan-400 flex items-center gap-0.5">RAG <ArrowUpRight size={10} /></span>
                 </div>
               </div>
             ))}
           </div>
         </div>
       ) : isCreating ? (
-        <form onSubmit={handleIndexProject} className="rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md p-8 max-w-xl mx-auto space-y-6">
-          <div className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer transition-colors" onClick={() => setIsCreating(false)}>
+        <form onSubmit={handleIndexProject} className="rounded-xl backdrop-blur-md p-8 max-w-xl mx-auto space-y-6"
+          style={{
+            background: 'rgba(10, 15, 30, 0.5)',
+            border: '1px solid rgba(6, 182, 212, 0.08)',
+          }}
+        >
+          <div className="flex items-center gap-1.5 text-slate-400 hover:text-cyan-400 cursor-pointer transition-colors" onClick={() => setIsCreating(false)}>
             <ArrowLeft size={14} />
             <span className="text-xs font-bold">Return to projects</span>
           </div>
 
           <div>
             <h3 className="text-xl font-extrabold text-slate-100">Index Repository</h3>
-            <p className="text-slate-440 text-xs mt-1 text-slate-400">
+            <p className="text-slate-400 text-xs mt-1">
               Provide project metadata and load source modules for pgvector injection.
             </p>
           </div>
@@ -307,7 +337,13 @@ export default function ExplainPage() {
               placeholder="e.g. Auth Gateway microservice"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
-              className="w-full bg-slate-950/80 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-all"
+              className="w-full rounded-lg p-3 text-xs text-slate-200 outline-none transition-all"
+              style={{
+                background: 'rgba(3, 7, 18, 0.8)',
+                border: '1px solid rgba(6, 182, 212, 0.08)',
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.08)'}
               required
               disabled={isIndexing}
             />
@@ -318,7 +354,11 @@ export default function ExplainPage() {
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Indexed File Modules ({uploadedFiles.length})</label>
               <button 
                 type="button" 
-                className="px-3 py-1 bg-slate-950 border border-slate-800 hover:bg-slate-850 rounded text-[10px] text-indigo-400 font-bold transition-colors"
+                className="px-3 py-1 rounded text-[10px] text-cyan-400 font-bold transition-colors"
+                style={{
+                  background: 'rgba(3, 7, 18, 0.8)',
+                  border: '1px solid rgba(6, 182, 212, 0.1)',
+                }}
                 onClick={loadSampleRepo}
                 disabled={isIndexing}
               >
@@ -330,19 +370,28 @@ export default function ExplainPage() {
               <DbIngestion3d status="indexing" filesCount={uploadedFiles.length} />
             ) : uploadedFiles.length === 0 ? (
               <div 
-                className="border-2 border-dashed border-slate-800 hover:border-indigo-500/40 rounded-xl p-8 text-center cursor-pointer transition-all bg-slate-950/20"
+                className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all"
+                style={{
+                  borderColor: 'rgba(6, 182, 212, 0.12)',
+                  background: 'rgba(3, 7, 18, 0.2)',
+                }}
                 onClick={loadSampleRepo}
               >
                 <Plus size={24} className="text-slate-600 mx-auto mb-2" />
                 <span className="text-xs font-bold text-slate-400">No files staged</span>
-                <p className="text-[10px] text-slate-550 mt-1 text-slate-500">Staging creates ~400 token semantic overlaps.</p>
+                <p className="text-[10px] text-slate-500 mt-1">Staging creates ~400 token semantic overlaps.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="max-h-[160px] overflow-y-auto border border-slate-850 bg-slate-950/80 p-3 rounded-lg space-y-2 font-mono text-[10px] text-slate-400">
+                <div className="max-h-[160px] overflow-y-auto p-3 rounded-lg space-y-2 font-mono text-[10px] text-slate-400"
+                  style={{
+                    border: '1px solid rgba(6, 182, 212, 0.06)',
+                    background: 'rgba(3, 7, 18, 0.8)',
+                  }}
+                >
                   {uploadedFiles.map((file, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <File size={12} className="text-indigo-400" />
+                      <File size={12} className="text-cyan-400" />
                       <span>{file.name}</span>
                     </div>
                   ))}
@@ -354,7 +403,7 @@ export default function ExplainPage() {
 
           <button 
             type="submit" 
-            className="w-full py-3 rounded-lg bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-650 bg-indigo-600"
+            className="w-full py-3 rounded-lg text-white text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shimmer-btn shadow-[0_4px_15px_rgba(6,182,212,0.2)]"
             disabled={isIndexing || !newProjectName.trim() || uploadedFiles.length === 0}
           >
             {isIndexing ? 'Building RAG Embeddings...' : 'Staged Repository Indexing'}
@@ -363,15 +412,20 @@ export default function ExplainPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* File Index sidebar */}
-          <div className="rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md p-5 flex flex-col space-y-4 max-h-[500px] overflow-y-auto">
-            <div className="flex items-center gap-1.5 text-slate-500 hover:text-slate-350 cursor-pointer transition-colors" onClick={() => setActiveProjectId(null)}>
+          <div className="rounded-xl backdrop-blur-md p-5 flex flex-col space-y-4 max-h-[500px] overflow-y-auto"
+            style={{
+              background: 'rgba(10, 15, 30, 0.5)',
+              border: '1px solid rgba(6, 182, 212, 0.08)',
+            }}
+          >
+            <div className="flex items-center gap-1.5 text-slate-500 hover:text-cyan-400 cursor-pointer transition-colors" onClick={() => setActiveProjectId(null)}>
               <ArrowLeft size={12} />
               <span className="text-[10px] font-bold uppercase tracking-wider">Leave Context</span>
             </div>
 
-            <div className="border-t border-slate-800/40 pt-3">
-              <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider mb-3 flex items-center gap-1.5 text-slate-300">
-                <Database size={14} className="text-indigo-400" />
+            <div className="pt-3" style={{ borderTop: '1px solid rgba(6, 182, 212, 0.06)' }}>
+              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Database size={14} className="text-cyan-400" />
                 <span>Context Indexes</span>
               </h4>
 
@@ -379,7 +433,13 @@ export default function ExplainPage() {
                 {activeProject?.files.map((file, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center gap-2 px-3 py-2 bg-slate-950/40 hover:bg-slate-900/50 rounded-lg text-[10px] text-slate-400 hover:text-slate-200 transition-all cursor-pointer font-mono border border-transparent hover:border-slate-800"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] text-slate-400 hover:text-slate-200 transition-all cursor-pointer font-mono"
+                    style={{
+                      background: 'rgba(3, 7, 18, 0.4)',
+                      border: '1px solid transparent',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.12)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
                     onClick={() => handleOpenSnippet(file.name, 1)}
                   >
                     <File size={12} className="text-slate-500 shrink-0" />
@@ -391,9 +451,19 @@ export default function ExplainPage() {
           </div>
 
           {/* Chat Panel */}
-          <div className="lg:col-span-3 rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md flex flex-col h-[550px] relative overflow-hidden">
+          <div className="lg:col-span-3 rounded-xl backdrop-blur-md flex flex-col h-[550px] relative overflow-hidden"
+            style={{
+              background: 'rgba(10, 15, 30, 0.5)',
+              border: '1px solid rgba(6, 182, 212, 0.08)',
+            }}
+          >
             {/* Header */}
-            <div className="h-14 border-b border-slate-800/60 flex items-center px-6 bg-slate-950/20 justify-between">
+            <div className="h-14 flex items-center px-6 justify-between"
+              style={{
+                borderBottom: '1px solid rgba(6, 182, 212, 0.06)',
+                background: 'rgba(3, 7, 18, 0.2)',
+              }}
+            >
               <div>
                 <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">{activeProject?.name}</h4>
               </div>
@@ -410,37 +480,57 @@ export default function ExplainPage() {
                   <div 
                     className={`max-w-[85%] rounded-xl p-4 text-xs leading-relaxed ${
                       msg.role === 'user' 
-                        ? 'bg-indigo-600 text-white font-medium shadow-[0_4px_12px_rgba(99,102,241,0.25)] rounded-tr-none' 
-                        : 'bg-slate-950/70 border border-slate-850/60 text-slate-300 rounded-tl-none'
+                        ? 'text-white font-medium rounded-tr-none shimmer-btn shadow-[0_4px_12px_rgba(6,182,212,0.2)]' 
+                        : 'text-slate-300 rounded-tl-none'
                     }`}
+                    style={msg.role === 'assistant' ? {
+                      background: 'rgba(3, 7, 18, 0.7)',
+                      border: '1px solid rgba(6, 182, 212, 0.06)',
+                    } : undefined}
                   >
                     {renderMessageContent(msg.content)}
                   </div>
                 </div>
               ))}
               {isLoading && activeProjectId && (chatMessages[activeProjectId]?.slice(-1)[0]?.content === 'Thinking...') && (
-                <div className="flex items-center gap-1.5 p-3 rounded-lg bg-slate-950/40 border border-slate-850/30 w-fit">
-                  <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" />
-                  <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                <div className="flex items-center gap-1.5 p-3 rounded-lg w-fit"
+                  style={{
+                    background: 'rgba(3, 7, 18, 0.4)',
+                    border: '1px solid rgba(6, 182, 212, 0.06)',
+                  }}
+                >
+                  <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" />
+                  <div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce [animation-delay:0.4s]" />
                 </div>
               )}
               <div ref={chatBottomRef} />
             </div>
 
             {/* Input area */}
-            <form onSubmit={handleAskQuestion} className="p-4 border-t border-slate-800/60 bg-slate-950/20 flex gap-3">
+            <form onSubmit={handleAskQuestion} className="p-4 flex gap-3"
+              style={{
+                borderTop: '1px solid rgba(6, 182, 212, 0.06)',
+                background: 'rgba(3, 7, 18, 0.2)',
+              }}
+            >
               <input
                 type="text"
                 placeholder="Ask about routing architecture, DB schemas..."
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                className="flex-1 bg-slate-950 border border-slate-850/60 rounded-lg px-4 py-3 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
+                className="flex-1 rounded-lg px-4 py-3 text-xs text-slate-200 outline-none transition-colors"
+                style={{
+                  background: 'rgba(3, 7, 18, 0.8)',
+                  border: '1px solid rgba(6, 182, 212, 0.08)',
+                }}
+                onFocus={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)'}
+                onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.08)'}
                 disabled={isLoading}
               />
               <button 
                 type="submit" 
-                className="px-4 bg-indigo-650 hover:bg-indigo-600 text-white rounded-lg flex items-center justify-center transition-all bg-indigo-600 shadow-[0_4px_12px_rgba(99,102,241,0.3)] disabled:opacity-40"
+                className="px-4 text-white rounded-lg flex items-center justify-center transition-all disabled:opacity-40 shimmer-btn shadow-[0_4px_12px_rgba(6,182,212,0.2)]"
                 disabled={isLoading || !question.trim()}
               >
                 <Send size={14} />

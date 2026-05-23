@@ -12,11 +12,19 @@ interface FloatingToken {
   delay: string;
   duration: string;
   size: string;
+  color: string;
 }
 
 const MOCK_TOKENS = [
   'const', 'async', 'await', '=>', '{ }', 'import', 'export', 'function',
   'return', 'class', 'interface', 'string', 'boolean', 'Promise', '[]'
+];
+
+const TOKEN_COLORS = [
+  'text-cyan-500/12',
+  'text-fuchsia-500/10',
+  'text-amber-500/8',
+  'text-violet-500/10',
 ];
 
 export default function LoginPage() {
@@ -39,14 +47,15 @@ export default function LoginPage() {
   useEffect(() => {
     setIsDemo(process.env.NEXT_PUBLIC_DEMO_MODE === 'true');
 
-    // Build random floating code tokens to avoid hydration mismatches
+    // Build random floating code tokens with multi-color
     const generatedParticles: FloatingToken[] = Array.from({ length: 15 }).map((_, idx) => ({
       id: idx,
       text: MOCK_TOKENS[Math.floor(Math.random() * MOCK_TOKENS.length)],
       left: `${Math.random() * 90 + 5}%`,
       delay: `${Math.random() * -20}s`,
       duration: `${Math.random() * 15 + 15}s`,
-      size: `${Math.random() * 0.4 + 0.8}rem`
+      size: `${Math.random() * 0.4 + 0.8}rem`,
+      color: TOKEN_COLORS[Math.floor(Math.random() * TOKEN_COLORS.length)],
     }));
     setParticles(generatedParticles);
   }, []);
@@ -63,7 +72,8 @@ export default function LoginPage() {
     confetti({
       particleCount: 100,
       spread: 70,
-      origin: { y: 0.6 }
+      origin: { y: 0.6 },
+      colors: ['#06b6d4', '#d946ef', '#f59e0b', '#8b5cf6'],
     });
 
     setTimeout(() => {
@@ -94,7 +104,8 @@ export default function LoginPage() {
       confetti({
         particleCount: 80,
         spread: 50,
-        origin: { y: 0.6 }
+        origin: { y: 0.6 },
+        colors: ['#06b6d4', '#d946ef', '#8b5cf6'],
       });
       setTimeout(() => {
         setLoading(false);
@@ -120,7 +131,8 @@ export default function LoginPage() {
         confetti({
           particleCount: 100,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
+          colors: ['#06b6d4', '#d946ef', '#f59e0b'],
         });
         setTimeout(() => {
           window.location.href = '/';
@@ -149,33 +161,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 p-6">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6" style={{ backgroundColor: '#030712' }}>
 
       {/* Toast Notification */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-2xl transition-all duration-300 ${toast.type === 'success'
-            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            ? 'border-emerald-500/20 text-emerald-400'
             : toast.type === 'error'
-              ? 'bg-rose-500/10 border-rose-500/20 text-rose-455'
-              : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
-          }`}>
+              ? 'border-rose-500/20 text-rose-400'
+              : 'border-cyan-500/20 text-cyan-400'
+          }`}
+          style={{
+            background: toast.type === 'success'
+              ? 'rgba(16, 185, 129, 0.08)'
+              : toast.type === 'error'
+                ? 'rgba(244, 63, 94, 0.08)'
+                : 'rgba(6, 182, 212, 0.08)',
+          }}
+        >
           {toast.type === 'success' ? (
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
           ) : toast.type === 'error' ? (
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]" />
           ) : (
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#06b6d4]" />
           )}
           <span className="text-xs font-semibold">{toast.text}</span>
         </div>
       )}
 
-      {/* Floating Code Particles Layer */}
+      {/* Floating Code Particles Layer — Multi-color */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         {particles.map(p => (
           <div
             key={p.id}
-            className="absolute bottom-0 text-indigo-500/10 font-mono select-none animate-code-float"
+            className={`absolute bottom-0 ${p.color} font-mono select-none animate-code-float`}
             style={{
               left: p.left,
               animationDelay: p.delay,
@@ -190,9 +210,9 @@ export default function LoginPage() {
 
       {/* Cyber Grid tech background */}
       <div
-        className="absolute inset-0 opacity-5 pointer-events-none z-0"
+        className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
         style={{
-          backgroundImage: 'linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(6,182,212,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.1) 1px, transparent 1px)',
           backgroundSize: '36px 36px'
         }}
       />
@@ -200,23 +220,31 @@ export default function LoginPage() {
       {/* Auth Form Card */}
       <div className="relative z-10 w-full max-w-md">
         <Tilt3d>
-          <div className="glass-panel-tailwind rounded-2xl border border-slate-850/70 p-8 shadow-2xl relative overflow-hidden bg-slate-900/40 backdrop-blur-xl">
-
-            {/* Top Glowing Mesh inside Card */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-[2px]" />
+          <div className="glass-panel-tailwind rounded-2xl p-8 shadow-2xl relative overflow-hidden rainbow-rim"
+            style={{
+              background: 'rgba(10, 15, 30, 0.7)',
+              border: '1px solid rgba(6, 182, 212, 0.1)',
+            }}
+          >
 
             <div className="flex flex-col items-center mb-8">
-              <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 mb-3 border border-indigo-500/20">
+              <div className="p-3 rounded-xl text-cyan-400 mb-3"
+                style={{
+                  background: 'rgba(6, 182, 212, 0.1)',
+                  border: '1px solid rgba(6, 182, 212, 0.15)',
+                  boxShadow: '0 0 20px rgba(6, 182, 212, 0.15)',
+                }}
+              >
                 <Terminal size={28} className="animate-pulse" />
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-white">AI Code Assistant</h1>
+              <h1 className="text-xl font-bold tracking-tight aurora-text">AI Code Assistant</h1>
               <p className="text-xs text-slate-500 mt-1">Next-Gen Code Audit Workspace</p>
             </div>
 
-            {/* Sliding highlight tab bar */}
-            <div className="relative flex p-1 bg-slate-950 border border-slate-850 rounded-xl mb-6">
+            {/* Sliding highlight tab bar — gradient */}
+            <div className="relative flex p-1 rounded-xl mb-6" style={{ background: 'rgba(3, 7, 18, 0.8)', border: '1px solid rgba(6, 182, 212, 0.06)' }}>
               <div
-                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-indigo-600 rounded-lg transition-transform duration-300 ease-out ${activeTab === 'signup' ? 'translate-x-[100%]' : 'translate-x-0'
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg transition-transform duration-300 ease-out shimmer-btn ${activeTab === 'signup' ? 'translate-x-[100%]' : 'translate-x-0'
                   }`}
               />
               <button
@@ -239,7 +267,12 @@ export default function LoginPage() {
 
             {/* Error alerts */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-450 text-xs mb-4 text-rose-400">
+              <div className="flex items-center gap-2 p-3 rounded-lg text-rose-400 text-xs mb-4"
+                style={{
+                  background: 'rgba(244, 63, 94, 0.06)',
+                  border: '1px solid rgba(244, 63, 94, 0.15)',
+                }}
+              >
                 <AlertCircle size={14} className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -257,7 +290,13 @@ export default function LoginPage() {
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none transition-colors"
+                    style={{
+                      background: 'rgba(3, 7, 18, 0.8)',
+                      border: '1px solid rgba(6, 182, 212, 0.08)',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.08)'}
                     required
                   />
                 </div>
@@ -274,7 +313,13 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none transition-colors"
+                    style={{
+                      background: 'rgba(3, 7, 18, 0.8)',
+                      border: '1px solid rgba(6, 182, 212, 0.08)',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.08)'}
                     required
                   />
                 </div>
@@ -292,7 +337,13 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none transition-colors"
+                      style={{
+                        background: 'rgba(3, 7, 18, 0.8)',
+                        border: '1px solid rgba(6, 182, 212, 0.08)',
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.08)'}
                       required
                     />
                   </div>
@@ -301,7 +352,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-1.5 py-3 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] disabled:opacity-40 bg-indigo-600"
+                className="w-full flex items-center justify-center gap-1.5 py-3 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-40 shimmer-btn shadow-[0_4px_15px_rgba(6,182,212,0.2)]"
                 disabled={loading}
               >
                 {activeTab === 'signin' ? <LogIn size={14} /> : <UserPlus size={14} />}
@@ -311,14 +362,18 @@ export default function LoginPage() {
 
             {/* Quick Demo Mode Login */}
             {isDemo && activeTab === 'signin' && (
-              <div className="mt-6 pt-6 border-t border-slate-850/60">
+              <div className="mt-6 pt-6" style={{ borderTop: '1px solid rgba(6, 182, 212, 0.06)' }}>
                 <div className="text-center mb-4">
                   <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Fast Local Testing</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleDemoSignIn}
-                  className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-slate-950 border border-slate-800 hover:bg-slate-850 text-indigo-400 hover:text-indigo-300 text-xs font-bold rounded-xl transition-all"
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 text-cyan-400 hover:text-cyan-300 text-xs font-bold rounded-xl transition-all"
+                  style={{
+                    background: 'rgba(3, 7, 18, 0.8)',
+                    border: '1px solid rgba(6, 182, 212, 0.12)',
+                  }}
                   disabled={loading}
                 >
                   <Sparkles size={12} className="animate-pulse" />

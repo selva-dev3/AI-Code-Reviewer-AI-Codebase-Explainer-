@@ -144,8 +144,6 @@ def save_chat_async(project_id, question, answer):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def execute_explain(request):
-    is_demo = os.environ.get('NEXT_PUBLIC_DEMO_MODE') == 'true' or not request.user.is_authenticated
-
     question = request.data.get('question')
     project_id = request.data.get('projectId')
 
@@ -155,11 +153,27 @@ def execute_explain(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # Check if project is a demo project
+    is_demo = (
+        os.environ.get('NEXT_PUBLIC_DEMO_MODE') == 'true' or 
+        not request.user.is_authenticated or 
+        str(project_id).startswith('demo-')
+    )
+
     if is_demo:
         return get_demo_explain_stream(question, project_id)
 
+    # Validate project_id is numeric
     try:
-        project = Project.objects.get(id=project_id, user=request.user)
+        project_id_int = int(project_id)
+    except (ValueError, TypeError):
+        return JsonResponse(
+            {'error': 'Invalid project ID format.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        project = Project.objects.get(id=project_id_int, user=request.user)
     except Project.DoesNotExist:
         return JsonResponse(
             {'error': 'Project not found.'},

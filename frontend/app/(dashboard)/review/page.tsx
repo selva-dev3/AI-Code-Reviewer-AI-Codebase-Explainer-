@@ -38,7 +38,7 @@ export default function ReviewPage() {
           particleCount: 80,
           spread: 60,
           origin: { y: 0.8 },
-          colors: ['#6366f1', '#8b5cf6', '#3b82f6']
+          colors: ['#06b6d4', '#d946ef', '#8b5cf6', '#f59e0b']
         });
       }
     }
@@ -65,13 +65,22 @@ export default function ReviewPage() {
       </div>
 
       {!hasReviewed || error ? (
-        <form onSubmit={handleSubmit} className="rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="rounded-xl backdrop-blur-md p-6 space-y-6"
+          style={{
+            background: 'rgba(10, 15, 30, 0.5)',
+            border: '1px solid rgba(6, 182, 212, 0.08)',
+          }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <label className="text-sm font-semibold text-slate-200">Source Editor</label>
             <select 
-              className="bg-slate-950 border border-slate-800 text-slate-200 text-xs px-3 py-1.5 rounded-lg outline-none cursor-pointer focus:border-indigo-500 transition-colors"
+              className="text-slate-200 text-xs px-3 py-1.5 rounded-lg outline-none cursor-pointer transition-colors"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
+              style={{
+                background: 'rgba(3, 7, 18, 0.8)',
+                border: '1px solid rgba(6, 182, 212, 0.1)',
+              }}
             >
               {LANGUAGES.map(lang => (
                 <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -79,17 +88,23 @@ export default function ReviewPage() {
             </select>
           </div>
 
-          <div className="border border-slate-800/80 rounded-xl overflow-hidden bg-slate-955/80">
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(6, 182, 212, 0.08)' }}>
             <textarea
-              className="w-full min-h-[350px] p-6 bg-slate-950/80 text-slate-100 font-mono text-xs leading-relaxed outline-none resize-y"
+              className="w-full min-h-[350px] p-6 text-slate-100 font-mono text-xs leading-relaxed outline-none resize-y"
               placeholder="// Paste your source code code block here..."
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              style={{ background: 'rgba(3, 7, 18, 0.8)' }}
             />
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-rose-455 text-sm bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg text-rose-400">
+            <div className="flex items-center gap-2 text-rose-400 text-sm p-3 rounded-lg"
+              style={{
+                background: 'rgba(244, 63, 94, 0.06)',
+                border: '1px solid rgba(244, 63, 94, 0.15)',
+              }}
+            >
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
@@ -97,7 +112,7 @@ export default function ReviewPage() {
 
           <button 
             type="submit" 
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-550 text-white font-semibold text-sm transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-white font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed transform hover:-translate-y-0.5 shimmer-btn shadow-[0_4px_15px_rgba(6,182,212,0.2)]"
             disabled={isLoading || !code.trim()}
           >
             <Sparkles size={16} className="animate-pulse" />
@@ -107,32 +122,48 @@ export default function ReviewPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
           {/* Editor Side */}
-          <div className="lg:col-span-3 rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md flex flex-col relative overflow-hidden">
+          <div className="lg:col-span-3 rounded-xl backdrop-blur-md flex flex-col relative overflow-hidden"
+            style={{
+              background: 'rgba(10, 15, 30, 0.5)',
+              border: '1px solid rgba(6, 182, 212, 0.08)',
+            }}
+          >
             
             {/* Show Laser Scanner overlay if compiling/loading */}
             {isLoading && <LaserScanner />}
 
-            <div className="h-14 border-b border-slate-800/60 flex items-center justify-between px-6 bg-slate-950/30">
+            <div className="h-14 flex items-center justify-between px-6"
+              style={{
+                borderBottom: '1px solid rgba(6, 182, 212, 0.06)',
+                background: 'rgba(3, 7, 18, 0.3)',
+              }}
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500">Language:</span>
                 <span className="text-xs font-bold text-slate-200 capitalize">{language}</span>
               </div>
               <button 
-                className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs hover:bg-slate-850 text-slate-300 transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs text-slate-300 transition-colors hover:text-cyan-400"
+                style={{
+                  background: 'rgba(3, 7, 18, 0.8)',
+                  border: '1px solid rgba(6, 182, 212, 0.08)',
+                }}
                 onClick={() => setHasReviewed(false)}
               >
                 Reset Code
               </button>
             </div>
 
-            <div className="flex bg-slate-950/90 min-h-[450px] relative">
+            <div className="flex min-h-[450px] relative" style={{ background: 'rgba(3, 7, 18, 0.9)' }}>
               {/* Line Numbers column */}
-              <div className="w-12 bg-slate-950 border-r border-slate-900 text-right pr-3 select-none py-6 font-mono text-[10px] text-slate-600 leading-[22px]">
+              <div className="w-12 border-r border-slate-900 text-right pr-3 select-none py-6 font-mono text-[10px] text-slate-600 leading-[22px]"
+                style={{ background: 'rgba(3, 7, 18, 1)' }}
+              >
                 {code.split('\n').map((_, idx) => (
                   <div 
                     key={idx} 
                     className={`transition-colors duration-200 ${
-                      activeLine === idx + 1 ? 'text-indigo-400 font-bold' : ''
+                      activeLine === idx + 1 ? 'text-cyan-400 font-bold' : ''
                     }`}
                   >
                     {idx + 1}
@@ -151,8 +182,8 @@ export default function ReviewPage() {
                   let borderLeft = 'border-l-2 border-transparent';
                   
                   if (isHighlighted) {
-                    lineBg = 'bg-indigo-500/10';
-                    borderLeft = 'border-l-2 border-indigo-500';
+                    lineBg = 'bg-cyan-500/10';
+                    borderLeft = 'border-l-2 border-cyan-500';
                   } else if (lineReview) {
                     if (lineReview.severity === 'critical') {
                       lineBg = 'bg-rose-500/5';
@@ -182,12 +213,17 @@ export default function ReviewPage() {
           </div>
 
           {/* Results Side */}
-          <div className="lg:col-span-2 rounded-xl border border-slate-850/60 bg-slate-900/40 backdrop-blur-md p-6 max-h-[700px] overflow-y-auto">
+          <div className="lg:col-span-2 rounded-xl backdrop-blur-md p-6 max-h-[700px] overflow-y-auto"
+            style={{
+              background: 'rgba(10, 15, 30, 0.5)',
+              border: '1px solid rgba(6, 182, 212, 0.08)',
+            }}
+          >
             <div className="flex items-center justify-between mb-6">
               <span className="font-bold text-slate-200">Analysis Output</span>
               {isLoading && (
-                <div className="flex items-center gap-2 text-xs text-indigo-400">
-                  <div className="w-3 h-3 border-2 border-indigo-500/20 border-t-indigo-400 rounded-full animate-spin" />
+                <div className="flex items-center gap-2 text-xs text-cyan-400">
+                  <div className="w-3 h-3 border-2 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin" />
                   <span>Auditing...</span>
                 </div>
               )}
@@ -195,20 +231,20 @@ export default function ReviewPage() {
 
             {/* Severity Cards */}
             <div className="grid grid-cols-4 gap-2 mb-6">
-              <div className="bg-rose-500/5 border border-rose-500/20 py-2.5 rounded-lg text-center">
-                <div className="text-rose-455 font-bold text-base text-rose-400">{criticalCount}</div>
+              <div className="py-2.5 rounded-lg text-center" style={{ background: 'rgba(244,63,94,0.05)', border: '1px solid rgba(244,63,94,0.15)' }}>
+                <div className="text-rose-400 font-bold text-base">{criticalCount}</div>
                 <div className="text-[10px] text-slate-400 font-medium">Critical</div>
               </div>
-              <div className="bg-orange-500/5 border border-orange-500/20 py-2.5 rounded-lg text-center">
-                <div className="text-orange-455 font-bold text-base text-orange-400">{majorCount}</div>
+              <div className="py-2.5 rounded-lg text-center" style={{ background: 'rgba(249,115,22,0.05)', border: '1px solid rgba(249,115,22,0.15)' }}>
+                <div className="text-orange-400 font-bold text-base">{majorCount}</div>
                 <div className="text-[10px] text-slate-400 font-medium">Major</div>
               </div>
-              <div className="bg-amber-500/5 border border-amber-500/20 py-2.5 rounded-lg text-center">
-                <div className="text-amber-455 font-bold text-base text-amber-400">{minorCount}</div>
+              <div className="py-2.5 rounded-lg text-center" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                <div className="text-amber-400 font-bold text-base">{minorCount}</div>
                 <div className="text-[10px] text-slate-400 font-medium">Minor</div>
               </div>
-              <div className="bg-blue-500/5 border border-blue-500/20 py-2.5 rounded-lg text-center">
-                <div className="text-blue-455 font-bold text-base text-blue-400">{styleCount}</div>
+              <div className="py-2.5 rounded-lg text-center" style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.15)' }}>
+                <div className="text-cyan-400 font-bold text-base">{styleCount}</div>
                 <div className="text-[10px] text-slate-400 font-medium">Style</div>
               </div>
             </div>
@@ -222,39 +258,47 @@ export default function ReviewPage() {
               <div className="space-y-4">
                 {reviews.map((item, index) => {
                   const isHighlighted = activeLine === item.line;
-                  let borderClass = 'border-slate-800';
-                  let bgClass = 'bg-slate-900/30';
-                  let badgeClass = 'bg-slate-800 text-slate-300';
+                  let borderColor = 'rgba(6, 182, 212, 0.06)';
+                  let bgColor = 'rgba(10, 15, 30, 0.3)';
+                  let badgeClass = 'text-slate-300';
+                  let badgeBg = 'rgba(30, 41, 59, 0.5)';
                   
                   if (item.severity === 'critical') {
-                    borderClass = 'border-rose-900/30';
-                    bgClass = 'bg-rose-500/5';
-                    badgeClass = 'bg-rose-500/10 text-rose-455 text-rose-400';
+                    borderColor = 'rgba(244, 63, 94, 0.15)';
+                    bgColor = 'rgba(244, 63, 94, 0.04)';
+                    badgeClass = 'text-rose-400';
+                    badgeBg = 'rgba(244, 63, 94, 0.1)';
                   } else if (item.severity === 'major') {
-                    borderClass = 'border-orange-900/30';
-                    bgClass = 'bg-orange-500/5';
-                    badgeClass = 'bg-orange-500/10 text-orange-455 text-orange-400';
+                    borderColor = 'rgba(249, 115, 22, 0.15)';
+                    bgColor = 'rgba(249, 115, 22, 0.04)';
+                    badgeClass = 'text-orange-400';
+                    badgeBg = 'rgba(249, 115, 22, 0.1)';
                   } else if (item.severity === 'minor') {
-                    borderClass = 'border-amber-900/30';
-                    bgClass = 'bg-amber-500/5';
-                    badgeClass = 'bg-amber-500/10 text-amber-455 text-amber-400';
+                    borderColor = 'rgba(245, 158, 11, 0.15)';
+                    bgColor = 'rgba(245, 158, 11, 0.04)';
+                    badgeClass = 'text-amber-400';
+                    badgeBg = 'rgba(245, 158, 11, 0.1)';
                   }
 
                   return (
                     <div 
                       key={index}
-                      className={`rounded-xl border ${borderClass} ${bgClass} transition-all duration-200 overflow-hidden ${
-                        isHighlighted ? 'ring-1 ring-indigo-500/50 scale-[1.01] shadow-[0_0_15px_rgba(99,102,241,0.1)]' : ''
+                      className={`rounded-xl transition-all duration-200 overflow-hidden ${
+                        isHighlighted ? 'ring-1 ring-cyan-500/50 scale-[1.01] shadow-[0_0_15px_rgba(6,182,212,0.1)]' : ''
                       }`}
+                      style={{ background: bgColor, border: `1px solid ${borderColor}` }}
                       onMouseEnter={() => { if (item.line) setActiveLine(item.line); }}
                       onMouseLeave={() => { if (item.line) setActiveLine(null); }}
                     >
                       <div 
-                        className="px-4 py-3 flex items-center justify-between cursor-pointer border-b border-slate-850/50 bg-slate-950/20"
+                        className="px-4 py-3 flex items-center justify-between cursor-pointer"
+                        style={{ borderBottom: '1px solid rgba(6, 182, 212, 0.04)', background: 'rgba(3, 7, 18, 0.2)' }}
                         onClick={() => toggleFix(index)}
                       >
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${badgeClass}`}>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${badgeClass}`}
+                            style={{ background: badgeBg }}
+                          >
                             {item.severity || item.type}
                           </span>
                           {item.line && (
@@ -264,7 +308,7 @@ export default function ReviewPage() {
                           )}
                         </div>
                         {item.fix && (
-                          <div className="flex items-center gap-1 text-[10px] text-indigo-400 font-semibold">
+                          <div className="flex items-center gap-1 text-[10px] text-cyan-400 font-semibold">
                             <span>{expandedFixes[index] ? 'Hide' : 'Fix'}</span>
                             {expandedFixes[index] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                           </div>
@@ -274,8 +318,18 @@ export default function ReviewPage() {
                         <p className="text-xs text-slate-300 leading-relaxed">{item.message}</p>
                         
                         {item.fix && expandedFixes[index] && (
-                          <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/80 font-mono text-[10px] shadow-inner animate-fade-in">
-                            <div className="bg-slate-900 px-3 py-1.5 text-[9px] font-semibold text-slate-500 border-b border-slate-850">
+                          <div className="rounded-lg overflow-hidden font-mono text-[10px] shadow-inner animate-fade-in"
+                            style={{
+                              border: '1px solid rgba(6, 182, 212, 0.08)',
+                              background: 'rgba(3, 7, 18, 0.8)',
+                            }}
+                          >
+                            <div className="px-3 py-1.5 text-[9px] font-semibold text-slate-500"
+                              style={{
+                                background: 'rgba(10, 15, 30, 0.8)',
+                                borderBottom: '1px solid rgba(6, 182, 212, 0.06)',
+                              }}
+                            >
                               Diff Comparison
                             </div>
                             <pre className="p-3 text-emerald-400 whitespace-pre-wrap leading-normal">
