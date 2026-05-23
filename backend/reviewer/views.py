@@ -3,13 +3,130 @@ import json
 import time
 import threading
 from django.http import StreamingHttpResponse, JsonResponse
+from django.utils import timezone
+from django.utils.timesince import timesince
+from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from .models import Review
+from explainer.models import Project
 import openai
 
 KIMI_MODEL = os.environ.get('KIMI_MODEL', 'moonshot-v1-32k')
+
+
+def _get_user_or_demo(request):
+    """Resolve the current user, or fallback to demo user if in demo mode."""
+    if request.user.is_authenticated:
+        return request.user
+    # Try demo user
+    demo = User.objects.filter(username='demo@aireviewer.dev').first()
+    if demo:
+        return demo
+    # Fallback to first superuser or any user
+    return User.objects.first()
+
+
+def _calculate_quality_index(total_reviews, critical_count, major_count):
+    """Calculate a quality index letter grade from review stats."""
+    if total_reviews == 0:
+        return 'N/A'
+    bug_ratio = (critical_count * 3 + major_count) / max(total_reviews, 1)
+    if bug_ratio <= 0.2:
+        return 'A+'
+    elif bug_ratio <= 0.5:
+        return 'A'
+    elif bug_ratio <= 1.0:
+        return 'A-'
+    elif bug_ratio <= 1.5:
+        return 'B+'
+    elif bug_ratio <= 2.0:
+        return 'B'
+    elif bug_ratio <= 3.0:
+        return 'B-'
+    elif bug_ratio <= 4.0:
+        return 'C'
+    else:
+        return 'D'
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def dashboard_stats(request):
+    """Return aggregated dashboard statistics from the database."""
+    user = _get_user_or_demo(request)
+
+    if not user:
+        return JsonResponse({
+            'stats': {
+                'total_reviews': 0,
+                'critical_bugs': 0,
+                'codebase_projects': 0,
+                'quality_index': 'N/A',
+            },
+            'recent_reviews': [],
+        })
+
+    # All reviews for this user
+    reviews = Review.objects.filter(user=user)
+    total_reviews = reviews.count()
+
+    # Count bugs from completed review results
+    critical_count = 0
+    major_count = 0
+    completed_reviews = reviews.filter(status='complete')
+
+    for review in completed_reviews:
+        if review.result and isinstance(review.result, list):
+            for issue in review.result:
+                severity = issue.get('severity', '')
+                if severity == 'critical':
+                    critical_count += 1
+                elif severity == 'major':
+                    major_count += 1
+
+    # Projects count
+    project_count = Project.objects.filter(user=user).count()
+
+    # Quality index
+    quality_index = _calculate_quality_index(total_reviews, critical_count, major_count)
+
+    # Recent reviews (last 5)
+    recent = reviews.order_by('-created_at')[:5]
+    now = timezone.now()
+    recent_list = []
+
+    for r in recent:
+        # Count issues in this review
+        issue_count = 0
+        review_name = r.name or r.storage_path or f'Review #{r.id}'
+
+        if r.result and isinstance(r.result, list):
+            issue_count = len(r.result)
+
+        # Human-readable time diff
+        time_ago = timesince(r.created_at, now)
+        # Simplify: take only the first segment
+        time_ago = time_ago.split(',')[0].strip() + ' ago'
+
+        recent_list.append({
+            'id': str(r.id),
+            'name': review_name,
+            'date': time_ago,
+            'language': (r.language or 'unknown').capitalize(),
+            'issues': issue_count,
+        })
+
+    return JsonResponse({
+        'stats': {
+            'total_reviews': total_reviews,
+            'critical_bugs': critical_count,
+            'codebase_projects': project_count,
+            'quality_index': quality_index,
+        },
+        'recent_reviews': recent_list,
+    })
 REVIEW_SYSTEM_PROMPT = """You are a senior software engineer conducting a thorough code review.
 Analyse the provided code and respond with a JSON array of review items.
 Each item must have:
